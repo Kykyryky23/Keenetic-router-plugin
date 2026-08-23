@@ -1,0 +1,5 @@
+{
+  "name": "keenetic-router-plugin",
+  "description": "Управление роутером Keenetic через RCI API: диагностика, Wi-Fi, порты, маршруты, VPN policy-routing — с guard-слоем confirm/dryRun/ALLOW_DESTRUCTIVE.",
+  "version": "0.1.0"
+}
