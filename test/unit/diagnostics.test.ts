@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
-import {getWanStatus, exportConfig} from "../../src/capabilities/diagnostics.js";
+import {getWanStatus, exportConfig, checkFirmwareUpdate} from "../../src/capabilities/diagnostics.js";
 import {RouterTransport} from "../../src/transport/types.js";
 
 describe("getWanStatus", () => {
@@ -43,5 +43,19 @@ describe("exportConfig", () => {
         const result = await exportConfig(transport);
 
         expect(result).toBe("system\n    hostname test\n!");
+    });
+});
+
+describe("checkFirmwareUpdate", () => {
+    it("вызывает exec с {components: {list: {}}} и возвращает результат как есть", async () => {
+        const transport: RouterTransport = {
+            show: vi.fn(),
+            exec: vi.fn().mockResolvedValue({current: {title: "5.0.12"}, new: {title: "5.1.3"}}),
+        };
+
+        const result = await checkFirmwareUpdate(transport);
+
+        expect(transport.exec).toHaveBeenCalledWith({components: {list: {}}});
+        expect(result).toEqual({current: {title: "5.0.12"}, new: {title: "5.1.3"}});
     });
 });

@@ -34,3 +34,13 @@ export async function exportConfig(transport: RouterTransport): Promise<string> 
     const result = (await transport.show("running-config")) as { message: string[] };
     return result.message.join("\n");
 }
+
+/**
+ * Проверка наличия обновления KeeneticOS через компонентный менеджер роутера
+ *
+ * НЕ подтверждено на успешном пути: под непривилегированным аккаунтом (не "admin") этот вызов на
+ * роутере разработки возвращает ошибку "execute denied"
+ */
+export function checkFirmwareUpdate(transport: RouterTransport): Promise<unknown> {
+    return transport.exec({components: {list: {}}});
+}

@@ -43,6 +43,7 @@ async function main(): Promise<void> {
         process.exit(1);
     }
 
+    await tryCall("check_firmware_update", () => diagnostics.checkFirmwareUpdate(transport));
     await tryCall("get_system_info", () => diagnostics.getSystemInfo(transport));
     await tryCall("get_interfaces", () => diagnostics.getInterfaces(transport));
     await tryCall("list_devices", () => diagnostics.listDevices(transport));

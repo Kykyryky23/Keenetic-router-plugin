@@ -44,6 +44,24 @@ export function registerTools(server: McpServer, transport: RouterTransport): vo
     );
 
     server.registerTool(
+        "check_firmware_update",
+        {
+            title: "Проверить обновление прошивки",
+            description:
+                "Проверяет через компонентный менеджер роутера, доступна ли новая версия KeeneticOS в " +
+                "настроенном канале обновлений. ТРЕБУЕТ прав основного аккаунта admin — под менее " +
+                "привилегированным аккаунтом роутер отвечает ошибкой \"execute denied\" (подтверждено " +
+                "вживую на роутере разработки под непривилегированным аккаунтом). Это ограничение самого " +
+                "RCI, а не баг инструмента: если получена такая ошибка, сообщи пользователю, что нужен " +
+                "admin-аккаунт в конфигурации MCP-сервера (ROUTER_LOGIN/ROUTER_PASSWORD), и не пытайся " +
+                "обойти это иначе.",
+            inputSchema: z.object({}).strict(),
+            annotations: {readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true},
+        },
+        async () => json(await diagnostics.checkFirmwareUpdate(transport)),
+    );
+
+    server.registerTool(
         "get_system_info",
         {
             title: "Системная информация",
