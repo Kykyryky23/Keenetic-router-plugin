@@ -17,17 +17,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # semantic-release + commitlint's own toolchain needs Node 22+ (several transitive deps
+      # require >=22.12/22.22/24.10 — see CLAUDE.md "Versioning"). package.json's own
+      # engines (">=20") describes the plugin's runtime requirement, not this CI job's.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - run: npm ci
       - run: npm test
       - run: npm run build
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
 
       - env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

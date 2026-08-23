@@ -4,6 +4,7 @@
   "description": "Plugin for managing a Keenetic router (RCI API): MCP server + skill for an AI agent (Claude Code / Codex)",
   "type": "module",
   "private": true,
+  "license": "PolyForm-Noncommercial-1.0.0",
   "engines": {
     "node": ">=20"
   },
