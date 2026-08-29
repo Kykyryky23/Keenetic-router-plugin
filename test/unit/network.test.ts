@@ -1,5 +1,23 @@
 import {describe, expect, it} from "vitest";
-import {buildAddPortForwardPayload, buildRemovePortForwardPayload} from "../../src/capabilities/network.js";
+import {buildAddPortForwardPayload, buildAddRoutePayload, buildRemovePortForwardPayload} from "../../src/capabilities/network.js";
+
+describe("buildAddRoutePayload", () => {
+    it("без metric не добавляет поле в payload", () => {
+        const payload = buildAddRoutePayload({network: "10.0.5.0", mask: "255.255.255.0", target: "Wireguard1"});
+
+        expect(payload).toEqual({
+            ip: {route: [{network: "10.0.5.0", mask: "255.255.255.0", interface: "Wireguard1"}]},
+        });
+    });
+
+    it("с metric добавляет поле metric в элемент массива (НЕ подтверждено вживую)", () => {
+        const payload = buildAddRoutePayload({network: "10.0.5.0", mask: "255.255.255.0", target: "Wireguard1", metric: 2000});
+
+        expect(payload).toEqual({
+            ip: {route: [{network: "10.0.5.0", mask: "255.255.255.0", interface: "Wireguard1", metric: 2000}]},
+        });
+    });
+});
 
 describe("buildAddPortForwardPayload", () => {
     it("собирает подтверждённую на реальном роутере форму (массив, to-address/to-port)", () => {

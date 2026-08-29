@@ -8,6 +8,7 @@ import * as wifi from "../capabilities/wifi.js";
 import * as network from "../capabilities/network.js";
 import * as vpn from "../capabilities/vpn.js";
 import * as service from "../capabilities/service.js";
+import * as dnsRouting from "../capabilities/dns-routing.js";
 import {
     applyRouteBatch,
     buildRouteBatchPayload,
@@ -16,9 +17,11 @@ import {
 } from "../capabilities/routes-batch.js";
 
 function json(data: unknown) {
+
+    const structuredContent = Array.isArray(data) ? {items: data} : (data as Record<string, unknown>);
     return {
         content: [{type: "text" as const, text: JSON.stringify(data, null, 2)}],
-        structuredContent: data as Record<string, unknown>,
+        structuredContent,
     };
 }
 
@@ -292,6 +295,12 @@ export function registerTools(server: McpServer, transport: RouterTransport): vo
             network: z.string().describe("Адрес сети, например 10.0.5.0"),
             mask: z.string().describe("Маска подсети, например 255.255.255.0"),
             target: z.string().describe("Имя интерфейса или IP шлюза, куда направить маршрут."),
+            metric: z
+                .number()
+                .optional()
+                .describe(
+                    "Приоритет маршрута, меньше — приоритетнее (НЕ подтверждено вживую, проверяй на тестовом адресе перед боевым использованием).",
+                ),
             confirm: confirmField,
             dryRun: dryRunField,
         })
@@ -382,6 +391,39 @@ export function registerTools(server: McpServer, transport: RouterTransport): vo
                     args,
                     buildPayload: vpn.buildUnbindRouteFromVpnPayload,
                     execute: (a) => vpn.unbindRouteFromVpn(transport, a),
+                }),
+            ),
+    );
+
+    const domainRouteSchema = z
+        .object({
+            name: z.string().describe("Имя object-group, например domain-list3 (уникальное — сверься со списком существующих через export_config)"),
+            description: z.string().describe("Человекочитаемое описание списка"),
+            domains: z.array(z.string()).min(1).describe("Список доменов (FQDN)"),
+            target: z.string().describe("Имя интерфейса, куда направить трафик по этим доменам (обычно VPN, например Wireguard1)"),
+            confirm: confirmField,
+            dryRun: dryRunField,
+        })
+        .strict();
+
+    server.registerTool(
+        "add_domain_route",
+        {
+            title: "Добавить доменный маршрут (policy-routing по FQDN)",
+            description:
+                "Создаёт object-group fqdn со списком доменов и привязывает его через dns-proxy route к указанному интерфейсу. " +
+                "Форма подтверждена вживую (перехват XHR веб-интерфейса на Keenetic Hero 4G+).",
+            inputSchema: domainRouteSchema,
+            annotations: {readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false},
+        },
+        async (args) =>
+            json(
+                await runGuarded({
+                    toolName: "add_domain_route",
+                    tag: "write",
+                    args,
+                    buildPayload: dnsRouting.buildAddDomainRoutePayload,
+                    execute: (a) => dnsRouting.addDomainRoute(transport, a),
                 }),
             ),
     );

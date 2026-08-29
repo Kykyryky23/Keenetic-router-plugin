@@ -65,6 +65,13 @@ export interface RouteArgs {
     mask: string;
     /** Имя интерфейса (например Wireguard0) или IP шлюза. */
     target: string;
+    /**
+     * Приоритет маршрута (меньше — приоритетнее). НЕ подтверждено вживую — CLI поддерживает
+     * этот позиционный параметр, но действительно ли он определяет выбор между двумя auto-маршрутами
+     * на одну цель при одновременно поднятых интерфейсах, не проверялось. Проверяй на тестовом
+     * адресе перед боевым использованием.
+     */
+    metric?: number;
 }
 
 /** Подтверждено на реальном роутере: массив объектов, а не дерево по ключу-сети. */
@@ -76,6 +83,7 @@ export function buildAddRoutePayload(args: RouteArgs): Record<string, unknown> {
                     network: args.network,
                     mask: args.mask,
                     interface: args.target,
+                    ...(args.metric !== undefined ? {metric: args.metric} : {}),
                 },
             ],
         },
