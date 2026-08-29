@@ -1,6 +1,6 @@
 {
   "name": "keenetic-router-plugin",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Plugin for managing a Keenetic router (RCI API): MCP server + skill for an AI agent (Claude Code / Codex)",
   "type": "module",
   "private": true,
